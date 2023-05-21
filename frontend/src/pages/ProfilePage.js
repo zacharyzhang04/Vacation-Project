@@ -60,6 +60,7 @@ const ProfilePage = ({userData}) => {
           <p>End: {i && i.End.toDate().toString()}</p>
           <p>Location: {i && i.Location}</p>
           <p>Schedule: {i && i.Itinerary}</p>
+          <p>Packing List: {i && i.PackingList}</p>
         </div>
       ))}
     </div>
