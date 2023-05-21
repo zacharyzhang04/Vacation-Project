@@ -6,28 +6,30 @@ import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import NavBar from './components/navbar'
 
-
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
-
+  const [userData, setUserData] = useState(null);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
+  
+
 
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
+        console.log(userData);
+        return <HomePage userData={userData} />;
       case 'destinations':
         return <DestinationPage />;
       case 'result':
         return <ResultPage />;
       case 'login':
-        return <LoginPage />
+        return <LoginPage userData={userData} setUserData={setUserData} handlePageChange={handlePageChange}/>
       case 'profile':
-        return <ProfilePage />
+        return <ProfilePage userData={userData}/>
       default:
         return <HomePage />;
     }
@@ -36,7 +38,7 @@ function App() {
 
   return (
     <div className="App">
-      <NavBar handlePageChange={handlePageChange} />
+      <NavBar userData={userData} handlePageChange={handlePageChange} setUserData={setUserData} />
       {renderPage()}
     </div>
   );
