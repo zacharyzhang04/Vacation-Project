@@ -1,15 +1,16 @@
 import React from 'react';
-import {auth} from "../firebase.js"
+import {auth} from "../config/firebase.js"
 import {signOut} from 'firebase/auth';
 
-const Navbar = ({ handlePageChange }) => {
+const Navbar = ({ userData, handlePageChange, setUserData }) => {
   const logOut = async () => {
     try {
       await signOut(auth);
+      setUserData(null);
     } catch (err) {
       console.log(err);
     }
-    handlePageChange('login');
+    handlePageChange('home');
     console.log("DONE");
   }
 
@@ -23,10 +24,13 @@ const Navbar = ({ handlePageChange }) => {
           <button onClick={logOut}>Log Out</button>
         </li>
         <li>
+          <button onClick={() => handlePageChange('login')}>Log In</button>
+        </li>
+        <li>
           <button onClick={() => handlePageChange('destinations')}>Plan New Trip</button>
         </li>
         <li>
-          <button onClick={() => handlePageChange('profile')}>My Trips</button>
+          <button onClick={() => {if (userData) handlePageChange('profile')}}>My Trips</button>
         </li>
       </ul>
     </nav>

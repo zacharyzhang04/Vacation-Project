@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth"
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// FIX THIS USING CONFIG.JS AND .GITIGNORE LATER
 const firebaseConfig = {
     apiKey: "AIzaSyDRiu4_X3bWyywEvLWPDFXjxqvALkScJFg",
     authDomain: "travel-itinerary-db-247fc.firebaseapp.com",
@@ -12,7 +12,7 @@ const firebaseConfig = {
     measurementId: "G-7BZDKZ2HW4"
 };
 
-
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 
