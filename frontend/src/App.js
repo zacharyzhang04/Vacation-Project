@@ -1,5 +1,3 @@
-
-
 import React,  { useState } from 'react';
 import HomePage from './pages/Home';
 import DestinationPage from './pages/DestinationPage';
