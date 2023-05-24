@@ -47,26 +47,34 @@ const DestinationPage = () => {
   };
 
   return (
-    <div>
-      <h1>Plan your next trip!</h1>
-      where u live bro?
-      <input type="text" value={location} onChange={handleLocationChange} />
-      what activity u like to do?
-      <input type="text" value={activity} onChange={handleChange} />
-      <button onClick={addActivity}>Add Activity</button>
+    <div className='container'>
+      <h1>Almost There...</h1>
+      
+      <h3> We'll need to ask some questions to choose the perfect vacation destination!</h3>
+    
 
-      <div> u said that u live in {location}</div>
+      <p> Enter your desired vacation location (optional) </p> 
+      <input className="textbox" type="text" value={location} onChange={handleLocationChange} />
+  
+
+      <p>Enter your favorite vacation activities</p>
+      <input className="textbox" type="text" value={activity} onChange={handleChange} />
+      <br></br>
+      <button className="submit-button" onClick={addActivity}>Add Activity</button>
+
+
+
       <div>
         <h2>List of Activities</h2>
         <ul>
           {activities.map((activity, index) => (
-            <li key={index}>{activity}</li>
+            <div key={index}>{activity}</div>
           ))}
         </ul>
       </div>
 
 
-      <button onClick={planTrip}> SUBMIT INFO</button>
+      <button className="submit-button" onClick={planTrip}> PLAN MY TRIP</button>
     </div>
   );
 };
