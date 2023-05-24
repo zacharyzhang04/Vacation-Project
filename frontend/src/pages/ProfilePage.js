@@ -51,16 +51,28 @@ const ProfilePage = ({userData}) => {
 
   
   return (
-    <div>
+    <div className='container'>
       <h1>My Trips</h1>
       {itineraryList.map((i) => (
         <div key={i}>
-          <p>Owner: {i && i.OwnerName}</p>
-          <p>Start: {i && i.Start.toDate().toString()}</p>
-          <p>End: {i && i.End.toDate().toString()}</p>
-          <p>Location: {i && i.Location}</p>
-          <p>Schedule: {i && i.Itinerary}</p>
-          <p>Packing List: {i && i.PackingList}</p>
+          <h1> {i && i.Location} Itinerary  </h1>
+          <h3>START AND END DATES</h3> <p>{i && i.Start.toDate().toString()}</p>
+          <p> {i && i.End.toDate().toString()}</p>
+          <h3> ITINERARY</h3>
+          <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
+            {i &&
+              i.Itinerary.split(".").map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+          </ul>
+          <h3> PACKING LIST</h3>
+          <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
+            {i &&
+              i.PackingList.split(",").map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+          </ul>
+          
         </div>
       ))}
     </div>

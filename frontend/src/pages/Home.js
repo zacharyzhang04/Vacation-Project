@@ -4,22 +4,23 @@ function HomePage({userData}) {
   console.log(userData && userData.FullName);
   if (!userData) {
     return (
-      <div>
+      <div className='container'>
         <h1>Welcome to My Travel Planner!</h1>
-        <p>Start planning your dream vacation with ease.</p>
-        Sign in to view sum deets about yo self bruv. my name a borat i like you i like s--
+        <h3>Start planning your dream vacation with ease.</h3>
+        Sign in to begin
       </div>
     );
   }
   return (
-    <div>
+    <div className='container'>
       <h1>Welcome to My Travel Planner!</h1>
-      <p>Start planning your dream vacation with ease.</p>
+      <h3>Start planning your dream vacation with ease.</h3>
       WELCOME {userData && userData.FullName}!
-      <p>Email: {userData && userData.Email}</p>
+      {/* <p>Email: {userData && userData.Email}</p>
       <p>Age: {userData && userData.Age}</p>
       <p>Gender: {userData && userData.Gender}</p>
-      <p>Id: {userData && userData.UserId}</p>
+      <p>Id: {userData && userData.UserId}</p>*/}
+      
     </div>
   );
 }
