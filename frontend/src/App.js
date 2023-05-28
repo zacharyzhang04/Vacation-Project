@@ -1,4 +1,4 @@
-import React,  { useState } from 'react';
+import React,  { useState, useEffect } from 'react';
 import HomePage from './pages/Home';
 import DestinationPage from './pages/DestinationPage';
 import ResultPage from './pages/ResultPage';

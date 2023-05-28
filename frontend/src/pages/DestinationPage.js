@@ -1,11 +1,18 @@
 import React, {useState} from 'react';
 import { db} from "../config/firebase.js"
+import axios from 'axios';
 import { collection, addDoc } from "firebase/firestore";
+import queryString from 'query-string';
 
+// We def got to rename variables when we done. 
 const DestinationPage = () => {
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
   const [location, setLocation] = useState("");
+  const [currentLocation, setCurrentLocation] = useState("");
+  const [days, setDays] = useState("");
+  
+  const [response, setResponse] = useState('');
  
 
   // THIS IS FOR LATER, FOR WHEN WE CREATE THE ACTUAL ITINERARY
@@ -27,8 +34,16 @@ const DestinationPage = () => {
     setActivity(e.target.value);
   };
 
+  const handleCurrentLocationChange = (e) => {
+    setCurrentLocation(e.target.value);
+  };
+
   const handleLocationChange = (e) => {
     setLocation(e.target.value);
+  };
+
+  const handleDaysChange = (e) => {
+    setDays(e.target.value);
   };
   
   const addActivity = () => {
@@ -40,10 +55,29 @@ const DestinationPage = () => {
     }
   };
 
-  const planTrip = () => {
-    console.log("not implemented yet");
+  const planTrip = async () => {
     /* make request to backend to get openAI API data. then use that data to load next page. slay
      */
+
+    // We want to send JSON data, so we stringify our data
+    const params = {
+      "desiredLocation" : location,
+      "currentLocation": currentLocation,
+      "days": days,
+      "activities": activities
+    }
+    const myJSON = queryString.stringify(params);
+
+    fetch('http://localhost:5002/openai', {
+     method: 'POST',
+     headers: {"Content-Type": "application/json" },
+     body: JSON.stringify(params)
+    })
+    .then( response => response.text())
+    .then(data => setResponse(data))
+    .catch(error => console.error(error));
+
+    console.log(response);
   };
 
   return (
@@ -51,13 +85,21 @@ const DestinationPage = () => {
       <h1>Almost There...</h1>
       
       <h3> We'll need to ask some questions to choose the perfect vacation destination!</h3>
-    
 
-      <p> Enter your desired vacation location (optional) </p> 
-      <input className="textbox" type="text" value={location} onChange={handleLocationChange} />
+      <p> Enter your current location: (optional) </p> 
+      <input name="current_location" 
+      className="textbox" type="text" value={currentLocation} onChange={handleCurrentLocationChange} />
+
+      <p> Enter an example of your desired vacation location: (optional) </p> 
+      <input name="desired_location" 
+      className="textbox" type="text" value={location} onChange={handleLocationChange} />
+
+      <p> Enter your desired vacation length in days: </p> 
+      <input name="vacation_length"
+      className="textbox" type="text" value={days} onChange={handleDaysChange} />
   
 
-      <p>Enter your favorite vacation activities</p>
+      <p>Enter your favorite vacation activities: </p>
       <input className="textbox" type="text" value={activity} onChange={handleChange} />
       <br></br>
       <button className="submit-button" onClick={addActivity}>Add Activity</button>
@@ -74,7 +116,7 @@ const DestinationPage = () => {
       </div>
 
 
-      <button className="submit-button" onClick={planTrip}> PLAN MY TRIP</button>
+      <button type="submit" className="submit-button" onClick={planTrip}> PLAN MY TRIP</button>
     </div>
   );
 };
