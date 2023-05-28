@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
-import {auth, db} from "../config/firebase.js"
-import {signInWithEmailAndPassword } from 'firebase/auth';
+import {auth, db, googleProvider} from "../config/firebase.js"
+import {GoogleAuthProvider, createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
 import { collection, doc, onSnapshot } from "firebase/firestore";
+import GoogleButton from 'react-google-button'
 
 const LoginPage = ({ userData, setUserData, handlePageChange}) => {
   const [email, setEmail] = useState("");
@@ -10,24 +12,16 @@ const LoginPage = ({ userData, setUserData, handlePageChange}) => {
   const [age, setAge] = useState();
   const [gender, setGender] = useState("");
 
-      
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      // Sign in and change current user data
-      const {user} = await signInWithEmailAndPassword(auth, email, password);
-      onSnapshot((doc(collection(db, "users"), user.uid)), (snapshot) => {
-        if (snapshot.exists) {
-          setUserData(snapshot.data());
-          console.log(userData);
-          handlePageChange('home');
-        } else {
-          console.log('Document does not exist.');
-        }
-      });
-    } catch (err) {
-      console.log(err);
-    }
+  const signInUser = (user) => {
+    onSnapshot((doc(collection(db, "users"), user.uid)), (snapshot) => {
+      if (snapshot.exists) {
+        setUserData(snapshot.data());
+        console.log(userData);
+        handlePageChange('home');
+      } else {
+        console.log('Document does not exist.');
+      }
+    });
 
     // set all data to null
     console.log(auth?.currentUser?.email);
@@ -36,12 +30,32 @@ const LoginPage = ({ userData, setUserData, handlePageChange}) => {
     setPassword("");
     setAge(0);
     setGender("");
+  }
+
+  const defaultLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Sign in and change current user data
+      const {user} = await signInWithEmailAndPassword(auth, email, password);
+      signInUser(user);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const {user} = await signInWithPopup(auth, googleProvider);
+      signInUser(user);
+    } catch (err) {
+      console.log(err);
+    }
   };
   
   return (
     <div className='container'>
       <h1 className="title">Login</h1>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={defaultLogin}>
         <input className='login-button'
           type="email"
           placeholder="Email"
@@ -58,7 +72,9 @@ const LoginPage = ({ userData, setUserData, handlePageChange}) => {
         <br></br>
         <button className="submit-button" type="submit">Log In</button>
       </form>
-
+      <div id="googleButton">
+        <GoogleButton onClick={signInWithGoogle}/>
+      </div>
       <div>
         Don't have an account?
         <button className="submit-button" onClick={() => handlePageChange('signup')}> Sign Up</button>
