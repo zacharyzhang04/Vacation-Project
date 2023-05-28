@@ -5,10 +5,10 @@ import { collection, doc, onSnapshot } from "firebase/firestore";
 
 const LoginPage = ({ userData, setUserData, handlePageChange}) => {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  // const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [age, setAge] = useState();
-  const [gender, setGender] = useState("");
+  // const [age, setAge] = useState();
+  // const [gender, setGender] = useState("");
 
       
   const handleLogin = async (e) => {
@@ -32,10 +32,10 @@ const LoginPage = ({ userData, setUserData, handlePageChange}) => {
     // set all data to null
     console.log(auth?.currentUser?.email);
     setEmail("");
-    setName("");
+    // setName("");
     setPassword("");
-    setAge(0);
-    setGender("");
+    // setAge(0);
+    // setGender("");
   };
   
   return (

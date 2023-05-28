@@ -1,10 +1,17 @@
 import React from 'react';
 
-const ResultPage = () => {
+const saveTrip = () => {
+  
+}
+
+const ResultPage = ({response}) => {
   return (
-    <div>
-      <h1>Result Page</h1>
-      {/* Add your content here */}
+    <div className='container'>
+      <div>
+        <h1 className='white_h1'>Result Page</h1>
+        <p className='response'>{response}</p>
+        <button className="submit-button" onClick={saveTrip}> Save Trip</button>
+      </div>
     </div>
   );
 };

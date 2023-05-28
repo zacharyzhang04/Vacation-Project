@@ -1,18 +1,17 @@
 import React, {useState} from 'react';
 import { db} from "../config/firebase.js"
-import axios from 'axios';
 import { collection, addDoc } from "firebase/firestore";
 import queryString from 'query-string';
 
 // We def got to rename variables when we done. 
-const DestinationPage = () => {
+const DestinationPage = ({response, setResponse, handlePageChange}) => {
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
   const [location, setLocation] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
   const [days, setDays] = useState("");
   
-  const [response, setResponse] = useState('');
+  
  
 
   // THIS IS FOR LATER, FOR WHEN WE CREATE THE ACTUAL ITINERARY
@@ -59,25 +58,24 @@ const DestinationPage = () => {
     /* make request to backend to get openAI API data. then use that data to load next page. slay
      */
 
-    // We want to send JSON data, so we stringify our data
     const params = {
       "desiredLocation" : location,
       "currentLocation": currentLocation,
       "days": days,
       "activities": activities
     }
-    const myJSON = queryString.stringify(params);
 
-    fetch('http://localhost:5002/openai', {
-     method: 'POST',
-     headers: {"Content-Type": "application/json" },
-     body: JSON.stringify(params)
+    await fetch('http://localhost:5002/openai', {
+      method: 'POST',
+      headers: {"Content-Type": "application/json" },
+      body: JSON.stringify(params)
     })
     .then( response => response.text())
     .then(data => setResponse(data))
     .catch(error => console.error(error));
 
     console.log(response);
+    handlePageChange('result');
   };
 
   return (
@@ -116,7 +114,7 @@ const DestinationPage = () => {
       </div>
 
 
-      <button type="submit" className="submit-button" onClick={planTrip}> PLAN MY TRIP</button>
+      <button className="submit-button" onClick={planTrip}> PLAN MY TRIP</button>
     </div>
   );
 };

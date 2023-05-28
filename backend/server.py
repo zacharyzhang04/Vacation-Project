@@ -1,14 +1,12 @@
 import os
 import openai
-import json
 from flask import Flask, request, jsonify, redirect, render_template, request, url_for
 from flask_cors import CORS
 
 
 app = Flask(__name__)
-openai.api_key = "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"
-# os.getenv("OPENAI_API_KEY")
 CORS(app)
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 # Define routes

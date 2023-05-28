@@ -11,6 +11,7 @@ import "./App.css";
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [userData, setUserData] = useState(null);
+  const [response, setResponse] = useState('');
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -23,11 +24,11 @@ function App() {
     switch (currentPage) {
       case 'home':
         console.log(userData);
-        return <HomePage userData={userData} />;
+        return <HomePage userData={userData}/>;
       case 'destinations':
-        return <DestinationPage />;
+        return <DestinationPage response={response} setResponse={setResponse} handlePageChange={handlePageChange}/>;
       case 'result':
-        return <ResultPage />;
+        return <ResultPage response={response}/>;
       case 'login':
         return <LoginPage userData={userData} setUserData={setUserData} handlePageChange={handlePageChange}/>
       case 'profile':
