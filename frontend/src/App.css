@@ -2,6 +2,24 @@
   text-align: center;
 }
 
+.white_h1{
+	/* text-align: center;
+	width: 100%;
+	height: auto;
+	position: relative; */
+  padding-top:25px;
+	color: #FFF;
+	text-shadow: 1px 1px 1px #333;
+  font-family: 'Dancing Script', cursive;
+	font-size: 36px; 
+}
+
+.response {
+  padding-left:100px;
+  padding-right:100px;
+  color: #FFF;
+}
+
 .container {
   background-image: url("./background.jpeg");
   background-size: cover;

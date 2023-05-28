@@ -5,7 +5,7 @@ function HomePage({userData}) {
   if (!userData) {
     return (
       <div className='container'>
-        <h1>Welcome to My Travel Planner!</h1>
+        <h1 className='white_h1'>Welcome to My Travel Planner!</h1>
         <h3>Start planning your dream vacation with ease.</h3>
         Sign in to begin
       </div>
@@ -13,7 +13,7 @@ function HomePage({userData}) {
   }
   return (
     <div className='container'>
-      <h1>Welcome to My Travel Planner!</h1>
+      <h1 className='white_h1'>Welcome to My Travel Planner!</h1>
       <h3>Start planning your dream vacation with ease.</h3>
       WELCOME {userData && userData.FullName}!
       {/* <p>Email: {userData && userData.Email}</p>

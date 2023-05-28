@@ -7,10 +7,8 @@ import GoogleButton from 'react-google-button'
 
 const LoginPage = ({ userData, setUserData, handlePageChange}) => {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [age, setAge] = useState();
-  const [gender, setGender] = useState("");
+ 
 
   const signInUser = (user) => {
     onSnapshot((doc(collection(db, "users"), user.uid)), (snapshot) => {
@@ -26,10 +24,7 @@ const LoginPage = ({ userData, setUserData, handlePageChange}) => {
     // set all data to null
     console.log(auth?.currentUser?.email);
     setEmail("");
-    setName("");
     setPassword("");
-    setAge(0);
-    setGender("");
   }
 
   const defaultLogin = async (e) => {
