@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import { db} from "../config/firebase.js"
 import { collection, addDoc } from "firebase/firestore";
-import queryString from 'query-string';
 
 // We def got to rename variables when we done. 
 const DestinationPage = ({response, setResponse, handlePageChange}) => {
@@ -10,8 +9,8 @@ const DestinationPage = ({response, setResponse, handlePageChange}) => {
   const [location, setLocation] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
   const [days, setDays] = useState("");
-  
-  
+  const [start, setStart] = useState("");
+   
  
 
   // THIS IS FOR LATER, FOR WHEN WE CREATE THE ACTUAL ITINERARY
@@ -44,6 +43,10 @@ const DestinationPage = ({response, setResponse, handlePageChange}) => {
   const handleDaysChange = (e) => {
     setDays(e.target.value);
   };
+
+  const handleStartChange = (e) => {
+    setStart(e.target.value);
+  }
   
   const addActivity = () => {
     if (activity.trim() !== '') {
@@ -62,7 +65,8 @@ const DestinationPage = ({response, setResponse, handlePageChange}) => {
       "desiredLocation" : location,
       "currentLocation": currentLocation,
       "days": days,
-      "activities": activities
+      "activities": activities,
+      "startDate": start
     }
 
     await fetch('http://localhost:5002/openai', {
@@ -95,6 +99,11 @@ const DestinationPage = ({response, setResponse, handlePageChange}) => {
       <p> Enter your desired vacation length in days: </p> 
       <input name="vacation_length"
       className="textbox" type="text" value={days} onChange={handleDaysChange} />
+
+      <p> Enter the start date of your trip ("May 69th, 2023"): </p> 
+      <input name="start_date"
+      className="textbox" type="text" value={start} onChange={handleStartChange} />
+  
   
 
       <p>Enter your favorite vacation activities: </p>
