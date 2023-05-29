@@ -21,21 +21,30 @@ def openai_endpoint():
         activities = data["activities"]
         date = data["startDate"]
 
-        response = openai.ChatCompletion.create(
+        tripResponse = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=generate_message(
+            messages=generate_trip_prompt(
                 currentLocation, desiredLocation, days, activities, date
             ),
         )
-        result = response["choices"][0]["message"]["content"]
-        print(result)
-        return result
+        trip = tripResponse["choices"][0]["message"]["content"]
+
+        packingListResponse = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=generate_packingList_prompt(trip),
+        )
+        packingList = packingListResponse["choices"][0]["message"]["content"]
+
+        print(trip)
+        print(packingList)
+        return trip + packingList
     return "hi"
 
 
-def generate_message(currentLocation, desiredLocation, days, activities, date):
+def generate_trip_prompt(currentLocation, desiredLocation, days, activities, date):
     return [
-        {   "role": "system", 
+        {
+            "role": "system",
             "content": "You are a travel planning assisnant. "
             + "Generate a list of 2-3 travel destinations I can go to similar to the place the user mentioned. "
             + "For example, if the user likes Hawaii, suggest places like Cancun, the Caribbeans, etc. "
@@ -53,7 +62,7 @@ def generate_message(currentLocation, desiredLocation, days, activities, date):
             + "TWO. Cancun: \n"
             + "DAY 1: Chichen Itza"
             + "DAY 2: Tulum Mayan Ruins"
-            + "DAY 3: Bacalar Lake"
+            + "DAY 3: Bacalar Lake",
         },
         {
             "role": "user",
@@ -62,7 +71,7 @@ def generate_message(currentLocation, desiredLocation, days, activities, date):
             + " and I am currently planning a vacation trip that will span "
             + days
             + " days and begins on "
-            + date
+            + date,
         },
         {
             "role": "user",
@@ -71,8 +80,30 @@ def generate_message(currentLocation, desiredLocation, days, activities, date):
         },
         {
             "role": "user",
-            "content": "I would like to do these activities: " 
-            + ",".join(activities),
+            "content": "I would like to do these activities: " + ",".join(activities),
+        },
+    ]
+
+
+def generate_packingList_prompt(trip):
+    return [
+        {
+            "role": "system",
+            "content": "You are a travel planning assisnant. "
+            + "Generate a comprehensive packing list for me based off my trip information."
+            + "Format it into sections such as Clothing, Toiletries, Technology, and Miscellaneous"
+            + "Also, number each section 'SECTION 1 - ', 'SECTION 2 - ', 'SECTION 3 - ' ..."
+            + "For each section, generate a list of items to bring with the trip information in mind"
+            + "Format each list item on a new line, starting with 'ITEM 1: ', 'ITEM 2: ', etc. "
+            + "Here is an example of a Clothing section"
+            + "SECTION 1 - Clothing \n"
+            + "ITEM 1: Light and comfortable clothes for beach destinations, including shorts, t-shirts, tank tops, and sundresses/skirts\n"
+            + "ITEM 2: Swimsuits (at least 2 per destination) \n"
+            + "ITEM 3: Rash guard shirt for surfing and snorkeling \n",
+        },
+        {
+            "role": "user",
+            "content": "This is the itenerary for my trip:" + trip,
         },
     ]
 

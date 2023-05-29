@@ -1,31 +1,13 @@
 import React, {useState} from 'react';
-import { db} from "../config/firebase.js"
-import { collection, addDoc } from "firebase/firestore";
 
 // We def got to rename variables when we done. 
-const DestinationPage = ({response, setResponse, handlePageChange}) => {
+const DestinationPage = ({tripInput, setTripInput, tripData, setTripData, handlePageChange}) => {
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
-  const [location, setLocation] = useState("");
+  const [desiredLocation, setLocation] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
   const [days, setDays] = useState("");
   const [start, setStart] = useState("");
-   
- 
-
-  // THIS IS FOR LATER, FOR WHEN WE CREATE THE ACTUAL ITINERARY
-  /*
-  const [itineraryData, setItineraryData] = useState({});
-
-  const createItinerary = async () => {
-    try {
-      const itinerariesRef = collection(db, "itineraries");
-      await addDoc(itinerariesRef, itineraryData);
-      console.log("Itinerary created successfully!");
-    } catch (error) {
-      console.error("Error creating itinerary:", error);
-    }
-  };*/
 
 
   const handleChange = (e) => {
@@ -57,29 +39,30 @@ const DestinationPage = ({response, setResponse, handlePageChange}) => {
     }
   };
 
-  const planTrip = async () => {
+  const planTrip = () => {
     /* make request to backend to get openAI API data. then use that data to load next page. slay
      */
 
     const params = {
-      "desiredLocation" : location,
+      "desiredLocation" : desiredLocation,
       "currentLocation": currentLocation,
       "days": days,
       "activities": activities,
       "startDate": start
     }
+    setTripInput(params);
 
-    await fetch('http://localhost:5002/openai', {
-      method: 'POST',
-      headers: {"Content-Type": "application/json" },
-      body: JSON.stringify(params)
-    })
-    .then( response => response.text())
-    .then(data => setResponse(data))
-    .catch(error => console.error(error));
+    let currentTripData = {};
+    currentTripData["desiredLocation"] = desiredLocation;
+    currentTripData["currentLocation"] = currentLocation;
+    currentTripData["lengthOfTrip"] = Number(days);
+    currentTripData["startDate"] = start;
+    currentTripData["activities"] = activities;
+    currentTripData["itinerary"] = "";
+    currentTripData["packingList"] = "";
+    setTripData(currentTripData);
 
-    console.log(response);
-    handlePageChange('result');
+    handlePageChange('loading');
   };
 
   return (
@@ -94,18 +77,16 @@ const DestinationPage = ({response, setResponse, handlePageChange}) => {
 
       <p> Enter an example of your desired vacation location: (optional) </p> 
       <input name="desired_location" 
-      className="textbox" type="text" value={location} onChange={handleLocationChange} />
+      className="textbox" type="text" value={desiredLocation} onChange={handleLocationChange} />
 
       <p> Enter your desired vacation length in days: </p> 
       <input name="vacation_length"
       className="textbox" type="text" value={days} onChange={handleDaysChange} />
 
-      <p> Enter the start date of your trip ("May 69th, 2023"): </p> 
+      <p> Enter the start date of your trip ("e.g. May 4th, 2023"): </p> 
       <input name="start_date"
       className="textbox" type="text" value={start} onChange={handleStartChange} />
   
-  
-
       <p>Enter your favorite vacation activities: </p>
       <input className="textbox" type="text" value={activity} onChange={handleChange} />
       <br></br>

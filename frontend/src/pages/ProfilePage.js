@@ -5,7 +5,7 @@ import { db } from "../config/firebase.js"
 // SHOULD ACTUALLY BE NAMED MY TRIP PAGE
 
 const ProfilePage = ({userData}) => {
-  const [itineraryList, setItineraryList] = useState([]);
+  const [tripList, setTripList] = useState([]);
   const [idList, setIdList] = useState([]);
   
   const currentUser = userData.UserId;
@@ -15,29 +15,29 @@ const ProfilePage = ({userData}) => {
   console.log(currentUser);
 
   useEffect(() => {
-    const fetchItineraries = async () => {
+    const fetchTrips = async () => {
       try {
-        const newItineraries = [];
+        const newTrips = [];
         const newIds = [];
 
-        const itinerariesRef = collection(db, "itineraries");
-        const q = query(itinerariesRef, where("UserId", "==", currentUser));
+        const tripsRef = collection(db, "trips");
+        const q = query(tripsRef, where("UserId", "==", currentUser));
         const qSnapshot = await getDocs(q);
         qSnapshot.forEach((doc) => {
 
-          const newItinerary = doc.data();
+          const newTrip = doc.data();
           console.log(doc.id);
-          console.log(newItinerary);
+          console.log(newTrip);
           const ID = doc.id;
           
           const isDuplicate = idList.some((id) => { return (id === ID)});
           if (!isDuplicate) {
-            newItineraries.push(newItinerary);
+            newTrips.push(newTrip);
             newIds.push(ID);
           }
         });
 
-        setItineraryList(newItineraries);
+        setTripList(newTrips);
         setIdList(newIds);
         
       } catch (error) {
@@ -45,7 +45,7 @@ const ProfilePage = ({userData}) => {
       }
     };
 
-    fetchItineraries();
+    fetchTrips();
   }, []);
 
 
@@ -53,22 +53,22 @@ const ProfilePage = ({userData}) => {
   return (
     <div className='container'>
       <h1>My Trips</h1>
-      {itineraryList.map((i) => (
-        <div key={i}>
-          <h1> {i && i.Location} Itinerary  </h1>
-          <h3>START AND END DATES</h3> <p>{i && i.Start.toDate().toString()}</p>
-          <p> {i && i.End.toDate().toString()}</p>
+      {tripList.map((trip) => (
+        <div key={trip}>
+          <h1> {trip && trip.desiredLocation} Trip </h1>
+          <h3>START AND END DATES</h3> <p>{trip && trip.startDate}</p>
+          {/* <p> {trip && trip.End.toDate().toString()}</p> */}
           <h3> ITINERARY</h3>
           <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
-            {i &&
-              i.Itinerary.split(".").map((item, index) => (
+            {trip &&
+              trip.itinerary.split(".").map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
           </ul>
           <h3> PACKING LIST</h3>
           <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
-            {i &&
-              i.PackingList.split(",").map((item, index) => (
+            {trip &&
+              trip.packingList.split(",").map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
           </ul>
