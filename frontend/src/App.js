@@ -6,12 +6,15 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import NavBar from './components/navbar';
 import SignUpPage from './pages/SignUpPage';
+import LoadingPage from './pages/LoadingPage'
 import "./App.css";
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [userData, setUserData] = useState(null);
   const [response, setResponse] = useState('');
+  const [tripInput, setTripInput] = useState({});
+  const [tripData, setTripData] = useState({});
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -26,15 +29,25 @@ function App() {
         console.log(userData);
         return <HomePage userData={userData}/>;
       case 'destinations':
-        return <DestinationPage response={response} setResponse={setResponse} handlePageChange={handlePageChange}/>;
+        return <DestinationPage tripInput={tripInput} setTripInput={setTripInput} 
+                                tripData={tripData} setTripData={setTripData} 
+                                handlePageChange={handlePageChange}/>;
+      case 'loading':
+        return <LoadingPage tripInput={tripInput}
+                            response={response} setResponse={setResponse}
+                            handlePageChange={handlePageChange}/>;
       case 'result':
-        return <ResultPage response={response}/>;
+        return <ResultPage response={response}
+                            userData={userData}
+                            tripData={tripData} setTripData={setTripData} />;
       case 'login':
-        return <LoginPage userData={userData} setUserData={setUserData} handlePageChange={handlePageChange}/>
+        return <LoginPage userData={userData} setUserData={setUserData} 
+                          handlePageChange={handlePageChange}/>
       case 'profile':
         return <ProfilePage userData={userData}/>
       case 'signup':
-        return <SignUpPage userData={userData} setUserData={setUserData} handlePageChange={handlePageChange}/>
+        return <SignUpPage userData={userData} setUserData={setUserData} 
+                          handlePageChange={handlePageChange}/>
       default:
         return <HomePage />;
     }
