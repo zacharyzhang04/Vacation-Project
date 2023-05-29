@@ -15,51 +15,47 @@ const  MyMap = () => {
     }, []);
   
     return (
-    <>
-        <div ref={ref} style={style} id="map" />;
-        <Marker position={{lat:0,lng:-50}} map={map}/>
-    </>
+        <>
+            <div ref={ref} style={style} id="map" />
+            <Marker position={{lat:0, lng:0}} map={map} content="FUCKLSDJFLSDJFLSDKJ"/>
+        </>
     );
 }
 
-const Marker = (options) => {
-    const [marker, setMarker] = useState();
+const Marker = ({ position, map, content }) => {
+    const [marker, setMarker] = useState(null);
+    const [infoWindow, setInfoWindow] = useState(null);
   
     useEffect(() => {
-        if (!marker) {
-        setMarker(new window.google.maps.Marker());
-        }
+      const newMarker = new window.google.maps.Marker({});
+      const newInfoWindow = new window.google.maps.InfoWindow({content: content});
   
-        // to remove marker from map on unmount it:
-        return () => {
-            if (marker) {
-            marker.setMap(null);
-            }
+      setMarker(newMarker);
+      setInfoWindow(newInfoWindow);
+  
+      return () => {
+        newMarker.setMap(null);
+        newInfoWindow.close();
+      };
+    }, [content]);
+  
+    useEffect(() => {
+      if (marker && map) {
+        marker.setMap(map);
+        marker.setPosition(position);
+        const handleClick = () => {
+          infoWindow.open(map, marker);
         };
-    }, [marker]);
-
-    useEffect(() => {
-      if (marker) {
-        marker.setOptions(options);
+        marker.addListener('click', handleClick);
       }
-    }, [marker, options]);
-
+    }, [marker, map, position, infoWindow]);
+  
     return null;
-  };
-// const Marker = ({position, map}) => {
-//     const [marker, setMarker] = useState();
-//     useEffect(() => {
-//         setMarker(new window.google.maps.Marker({}))
-//     }, [])
+};
 
-//     if (marker) {
-//         marker.setMap(map);
-//         marker.setPosition(position);
-//     }
-// }
 
 const ChooseDestinationPage = () => {
-    return <Wrapper apiKey={process.env.REACT_APP_GMAPS_API_KEY} libraries={["marker"]}>
+    return <Wrapper apiKey={process.env.REACT_APP_GMAPS_API_KEY}>
         <MyMap />
     </Wrapper>
 };
