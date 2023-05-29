@@ -15,6 +15,18 @@ gmaps = googlemaps.Client(gmaps_api_key)
 
 
 # GMAPS
+def get_place_id_from_location(latitude, longitude):
+    result = gmaps.reverse_geocode(latlng=(latitude, longitude))
+
+    if result:
+        for component in result[0]["address_components"]:
+            if "place_id" in component:
+                place_id = component["place_id"]
+                return place_id
+
+    return None
+
+
 @app.route("/api/restaurants", methods=["POST"])
 def get_top_restaurants():
     location = request.args.get("location")
@@ -50,9 +62,7 @@ def getTripLocations():
     data = request.get_json()
 
     desiredLocation = data["desiredLocation"]
-    days = data["days"]
     activities = data["activities"]
-    date = data["startDate"]
 
     locationResponse = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -60,6 +70,26 @@ def getTripLocations():
     )
     locations = locationResponse["choices"][0]["message"]["content"]
     print(locations)
+
+    lines = locations.strip().split("\n")
+
+    locationDict = {}
+    for line in lines:
+        number, nextLocation = line.split(":", 1)
+        justLocation = nextLocation.split(" - ")[0]
+        locationDescription = nextLocation.split(" - ")[1]
+        locationDict[justLocation] = {"description": locationDescription}
+
+    # Get the latitude and longitude of locations
+    for location in locationDict:
+        geolocator = Nominatim(user_agent="my-app")
+        location_data = geolocator.geocode(location)
+
+        if location_data:
+            locationDict[location]["latitude"] = location_data.latitude
+            locationDict[location]["longitude"] = location_data.longitude
+
+    print(locationDict)
     return locations
 
 
@@ -98,20 +128,20 @@ def generate_trip_locations(desiredLocation, activities):
             + "For example: if the user likes Hawaii and swimming, suggest places like Cancun, Caribbeans, etc. "
             + "Example 2: if the user likes hiking, suggest places like the Canadian Rockies, Lake Tahoe, or Half Dome. "
             + "Format each different place on a new line. "
-            + "Number each place 'ONE. ', 'TWO. ', 'THREE. ', 'FOUR. ', ..."
-            + "Do not include anything besides the list. Again, do NOT include any extra information such as explanations. "
+            + "Number each place 'ONE: ', 'TWO: ', 'THREE: ', 'FOUR: ', ..."
+            + "After the name of the location add a hyphen and then a discription of the location "
             + "Here is an example where the location is 'Hawaii' and the activities are 'snorkeling' and 'sun-bathing': "
-            + "'ONE. Hawaii\n"
-            + "TWO. Cancun\n"
-            + "THREE. Philippines\n"
-            + "FOUR. Bora Bora\n"
-            + "FIVE. Galapagos Islands\n"
-            + "SIX. Caribbeans\n"
-            + "SEVEN. Fiji\n"
-            + "EIGHT. Samoa\n"
-            + "NINE. Dominican Republic\n"
-            + "TEN. Barbados'"
-            + "Notice how this model response ONLY included the list, and no explanations.",
+            + "'ONE: Hawaii - World-class beaches, pristine rainforests, and sizzling volcanoes are just a few things that make Hawaii a happening hotspot for tourists. Every Hawaiian Island has its own draw, making this state one that is filled with adventure and luxury no matter which way you turn.\n"
+            + "TWO: Cancun - Cancun is a paradise for nature lovers and adventure seekers since there are plenty of things to do. Dive or snorkel in the region’s mystic cenotes located nearby (limestone sinkholes), or enjoy the day by the beach, jet skiing or parasailing.\n"
+            + "THREE: Philippines\n"
+            + "FOUR: Bora Bora\n"
+            + "FIVE: Galapagos Islands\n"
+            + "SIX: Caribbeans\n"
+            + "SEVEN: Fiji\n"
+            + "EIGHT: Samoa\n"
+            + "NINE: Dominican Republic\n"
+            + "TEN: Barbados'"
+            + "Notice how Hawaii and Cancun had discriptions, this is the ideal format. ",
         },
         {
             "role": "user",
