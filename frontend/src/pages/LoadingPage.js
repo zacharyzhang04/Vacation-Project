@@ -12,7 +12,7 @@ const LoadingPage = ({tripInput, response, setResponse, handlePageChange}) => {
       .catch(error => console.error(error));
   
       console.log(response);
-      handlePageChange('result');
+      handlePageChange('choose');
   }
   getResponse();
   return (

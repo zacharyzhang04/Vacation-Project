@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 // We def got to rename variables when we done. 
-const DestinationPage = ({tripInput, setTripInput, tripData, setTripData, handlePageChange}) => {
+const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
   const [desiredLocation, setLocation] = useState("");
@@ -75,7 +75,7 @@ const DestinationPage = ({tripInput, setTripInput, tripData, setTripData, handle
       <input name="current_location" 
       className="textbox" type="text" value={currentLocation} onChange={handleCurrentLocationChange} />
 
-      <p> Enter an example of your desired vacation location: (optional) </p> 
+      <p> Enter an example of your desired vacation location </p> 
       <input name="desired_location" 
       className="textbox" type="text" value={desiredLocation} onChange={handleLocationChange} />
 

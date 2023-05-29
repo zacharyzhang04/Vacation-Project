@@ -1,51 +1,121 @@
 import os
 import openai
-from flask import Flask, request, jsonify, redirect, render_template, request, url_for
+from flask import Flask, request, jsonify, redirect, render_template, url_for
 from flask_cors import CORS
-
+import googlemaps
+from geopy.geocoders import Nominatim
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
+load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+gmaps_api_key = os.getenv("GMAPS_API_KEY")
+gmaps = googlemaps.Client(gmaps_api_key)
 
 
-# Define routes
-@app.route("/openai", methods=["GET", "POST"])
+
+
+
+# GMAPS
+@app.route('/api/restaurants', methods=["POST"])
+def get_top_restaurants():
+    location = request.args.get('location')
+
+    # Get the latitude and longitude of the location
+    geolocator = Nominatim(user_agent='my-app')
+    location_data = geolocator.geocode(location)
+
+    if location_data:
+        latitude, longitude = location_data.latitude, location_data.longitude
+        search_radius = 5000
+
+        # Perform the nearby search for restaurants and get the top 3 locations
+        top_restaurants = search_restaurants((latitude, longitude), search_radius)
+
+        # Return the top restaurants as JSON response
+        return jsonify({'restaurants': top_restaurants})
+    return jsonify({'error': 'Invalid location'})
+
+
+def search_restaurants(location, radius):
+    response = gmaps.places_nearby(
+        location=location,
+        radius=radius,
+        type='restaurant'
+    )
+
+    results = response['results']
+    sorted_results = sorted(results, key=lambda x: x.get('rating', 0), reverse=True)
+    top_3_locations = sorted_results[:3]
+    return top_3_locations
+
+# CHATGPT
+@app.route("/openai", methods=["POST"])
 def openai_endpoint():
-    if request.method == "POST":
-        data = request.get_json()
+    
+    data = request.get_json()
 
-        currentLocation = data["currentLocation"]
-        desiredLocation = data["desiredLocation"]
-        days = data["days"]
-        activities = data["activities"]
-        date = data["startDate"]
+    currentLocation = data["currentLocation"]
+    desiredLocation = data["desiredLocation"]
+    days = data["days"]
+    activities = data["activities"]
+    date = data["startDate"]
 
-        tripResponse = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=generate_trip_prompt(
-                currentLocation, desiredLocation, days, activities, date
-            ),
-        )
-        trip = tripResponse["choices"][0]["message"]["content"]
+    tripResponse = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=generate_trip_locations(desiredLocation, activities),
+    )
+    trip = tripResponse["choices"][0]["message"]["content"]
+    print(trip)
+    return trip
+    
+# HOW TO CALL THE PACKING LIST SHIT
+# packingListResponse = openai.ChatCompletion.create(
+#     model="gpt-3.5-turbo",
+#     messages=generate_packingList_prompt(trip),
+# )
+# packingList = packingListResponse["choices"][0]["message"]["content"]
 
-        packingListResponse = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=generate_packingList_prompt(trip),
-        )
-        packingList = packingListResponse["choices"][0]["message"]["content"]
-
-        print(trip)
-        print(packingList)
-        return trip + packingList
-    return "hi"
-
+def generate_trip_locations(desiredLocation, activities):
+    return [
+        {
+            "role": "system",
+            "content": "You are a travel-planning list-maker. "
+            + "Generate 10 travel destinations depending on user input. "
+            + "For example: if the user likes Hawaii and swimming, suggest places like Cancun, Caribbeans, etc. "
+            + "Example 2: if the user likes hiking, suggest places like the Canadian Rockies, Lake Tahoe, or Half Dome. "
+            + "Format each different place on a new line. "
+            + "Number each place 'ONE. ', 'TWO. ', 'THREE. ', 'FOUR. ', ..."
+            + "Do not include anything besides the list. Again, do NOT include any extra information such as explanations. "
+            + "Here is an example where the location is 'Hawaii' and the activities are 'snorkeling' and 'sun-bathing': "
+            + "'ONE. Hawaii\n"
+            + "TWO. Cancun\n"
+            + "THREE. Philippines\n"
+            + "FOUR. Bora Bora\n"
+            + "FIVE. Galapagos Islands\n"
+            + "SIX. Caribbeans\n"
+            + "SEVEN. Fiji\n"
+            + "EIGHT. Samoa\n"
+            + "NINE. Dominican Republic\n"
+            + "TEN. Barbados'"
+            + "Notice how this model response ONLY included the list, and no explanations."
+        },
+        {
+            "role": "user",
+            "content": "I am looking to go on a vacation in a place similar to " + desiredLocation
+        },
+        {
+            "role": "user",
+            "content": "I would like to do these activities: " + ",".join(activities)
+        }
+    ]
 
 def generate_trip_prompt(currentLocation, desiredLocation, days, activities, date):
     return [
         {
             "role": "system",
-            "content": "You are a travel planning assisnant. "
+            "content": "You are a travel planning assistant. "
             + "Generate a list of 2-3 travel destinations I can go to similar to the place the user mentioned. "
             + "For example, if the user likes Hawaii, suggest places like Cancun, the Caribbeans, etc. "
             + "Format it so that each different place I can visit is one a new line. "

@@ -8,6 +8,7 @@ import NavBar from './components/navbar';
 import SignUpPage from './pages/SignUpPage';
 import LoadingPage from './pages/LoadingPage'
 import "./App.css";
+import ChooseDestination from './pages/ChooseDestination';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -25,12 +26,11 @@ function App() {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'home':
-        console.log(userData);
-        return <HomePage userData={userData}/>;
+      case 'choose':
+        return <ChooseDestination />
       case 'destinations':
-        return <DestinationPage tripInput={tripInput} setTripInput={setTripInput} 
-                                tripData={tripData} setTripData={setTripData} 
+        return <DestinationPage setTripInput={setTripInput} 
+                                setTripData={setTripData} 
                                 handlePageChange={handlePageChange}/>;
       case 'loading':
         return <LoadingPage tripInput={tripInput}
@@ -49,7 +49,7 @@ function App() {
         return <SignUpPage userData={userData} setUserData={setUserData} 
                           handlePageChange={handlePageChange}/>
       default:
-        return <HomePage />;
+        return <HomePage userData={userData}/>;
     }
   };
 
