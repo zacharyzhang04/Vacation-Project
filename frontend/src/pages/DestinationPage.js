@@ -5,17 +5,12 @@ const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
   const [desiredLocation, setLocation] = useState("");
-  const [currentLocation, setCurrentLocation] = useState("");
   const [days, setDays] = useState("");
   const [start, setStart] = useState("");
 
 
   const handleChange = (e) => {
     setActivity(e.target.value);
-  };
-
-  const handleCurrentLocationChange = (e) => {
-    setCurrentLocation(e.target.value);
   };
 
   const handleLocationChange = (e) => {
@@ -45,7 +40,6 @@ const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
 
     const params = {
       "desiredLocation" : desiredLocation,
-      "currentLocation": currentLocation,
       "days": days,
       "activities": activities,
       "startDate": start
@@ -54,7 +48,6 @@ const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
 
     let currentTripData = {};
     currentTripData["desiredLocation"] = desiredLocation;
-    currentTripData["currentLocation"] = currentLocation;
     currentTripData["lengthOfTrip"] = Number(days);
     currentTripData["startDate"] = start;
     currentTripData["activities"] = activities;
@@ -70,10 +63,6 @@ const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
       <h1>Almost There...</h1>
       
       <h3> We'll need to ask some questions to choose the perfect vacation destination!</h3>
-
-      <p> Enter your current location: (optional) </p> 
-      <input name="current_location" 
-      className="textbox" type="text" value={currentLocation} onChange={handleCurrentLocationChange} />
 
       <p> Enter an example of your desired vacation location </p> 
       <input name="desired_location" 

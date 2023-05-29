@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {auth, db, googleProvider} from "../config/firebase.js"
-import {GoogleAuthProvider, createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
+import {signInWithEmailAndPassword, signInWithPopup} from 'firebase/auth';
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import GoogleButton from 'react-google-button'
 
