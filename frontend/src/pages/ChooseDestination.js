@@ -5,7 +5,20 @@ const  MyMap = () => {
     const [map, setMap] = useState();
     const ref = useRef();
     const style = { height: "100vh" }
-
+    
+    // add to CSS file later
+    const overlayTextStyle = {
+        font: "Times New Roman",
+        position: 'absolute',
+        top: '150px',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: '#ffffff50',
+        fontSize: '36px',
+        fontWeight: 'bold',
+        borderRadius: '5px',
+        border: '2px solid #ffffff'
+    };
   
     useEffect(() => {
       setMap(new window.google.maps.Map(ref.current, {
@@ -13,11 +26,13 @@ const  MyMap = () => {
         zoom: 3
       }));
     }, []);
-  
     return (
         <>
             <div ref={ref} style={style} id="map" />
-            <Marker position={{lat:0, lng:0}} map={map} content="FUCKLSDJFLSDJFLSDKJ"/>
+            <Marker position={{lat:0, lng:0}} map={map} 
+                content=
+                "<div>hello</div><button>click me</button>"/>
+            <div style={overlayTextStyle}> CHOOSE YOUR DESTINATION </div>
         </>
     );
 }
@@ -27,16 +42,18 @@ const Marker = ({ position, map, content }) => {
     const [infoWindow, setInfoWindow] = useState(null);
   
     useEffect(() => {
-      const newMarker = new window.google.maps.Marker({});
-      const newInfoWindow = new window.google.maps.InfoWindow({content: content});
+        const newMarker = new window.google.maps.Marker({});
+        const newInfoWindow = new window.google.maps.InfoWindow({
+            content: content
+        });
   
-      setMarker(newMarker);
-      setInfoWindow(newInfoWindow);
-  
-      return () => {
-        newMarker.setMap(null);
-        newInfoWindow.close();
-      };
+        setMarker(newMarker);
+        setInfoWindow(newInfoWindow);
+    
+        return () => {
+            newMarker.setMap(null);
+            newInfoWindow.close();
+        };
     }, [content]);
   
     useEffect(() => {

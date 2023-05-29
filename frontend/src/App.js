@@ -1,4 +1,4 @@
-import React,  { useState, useEffect } from 'react';
+import React,  { useState } from 'react';
 import HomePage from './pages/Home';
 import DestinationPage from './pages/DestinationPage';
 import ResultPage from './pages/ResultPage';
@@ -31,7 +31,9 @@ function App() {
       case 'destinations':
         return <DestinationPage setTripInput={setTripInput} 
                                 setTripData={setTripData} 
-                                handlePageChange={handlePageChange}/>;
+                                handlePageChange={handlePageChange}
+                                tripInput={tripInput}
+                            response={response} setResponse={setResponse} />;
       case 'loading':
         return <LoadingPage tripInput={tripInput}
                             response={response} setResponse={setResponse}

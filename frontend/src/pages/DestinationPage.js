@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 
 // We def got to rename variables when we done. 
-const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
+const DestinationPage = ({tripInput, response, setResponse, setTripInput, setTripData, handlePageChange}) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
   const [desiredLocation, setLocation] = useState("");
@@ -35,8 +36,7 @@ const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
   };
 
   const planTrip = () => {
-    /* make request to backend to get openAI API data. then use that data to load next page. slay
-     */
+    // make request to backend to get openAI API data. then use that data to load next page. slay
 
     const params = {
       "desiredLocation" : desiredLocation,
@@ -55,9 +55,29 @@ const DestinationPage = ({setTripInput, setTripData, handlePageChange}) => {
     currentTripData["packingList"] = "";
     setTripData(currentTripData);
 
-    handlePageChange('loading');
+    setIsLoading(true);
+    const getResponse = async () => {
+      await fetch('http://localhost:5002/tripLocations', {
+          method: 'POST',
+          headers: {"Content-Type": "application/json" },
+          body: JSON.stringify(tripInput)
+        })
+        .then( response => response.text())
+        .then(data => setResponse(data))
+        .catch(error => console.error(error));
+    
+        console.log(response);
+        setIsLoading(false);
+        handlePageChange('choose');
+    }
+    getResponse();
   };
-
+  
+  if (isLoading) {
+    return <div className='container'>
+      <h1>Loading...</h1>
+      </div>
+  }
   return (
     <div className='container'>
       <h1>Almost There...</h1>
