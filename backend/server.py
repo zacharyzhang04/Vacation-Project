@@ -69,15 +69,24 @@ def getTripLocations():
         messages=generate_trip_locations(desiredLocation, activities),
     )
     locations = locationResponse["choices"][0]["message"]["content"]
-    print(locations)
 
     lines = locations.strip().split("\n")
+    print(lines)
 
     locationDict = {}
     for line in lines:
-        number, nextLocation = line.split(":", 1)
-        justLocation = nextLocation.split(" - ")[0]
-        locationDescription = nextLocation.split(" - ")[1]
+        colon_index = line.find(":")
+        if colon_index == -1 or colon_index == len(line) - 1:
+            continue
+        nextLocation = line[colon_index + 2 :]
+
+        hyphen_index = nextLocation.find("-")
+        if hyphen_index == -1 or hyphen_index == len(line) - 1:
+            continue
+        justLocation, locationDescription = (
+            nextLocation[: hyphen_index - 1],
+            nextLocation[hyphen_index + 2 :],
+        )
         locationDict[justLocation] = {"description": locationDescription}
 
     # Get the latitude and longitude of locations
@@ -124,7 +133,7 @@ def generate_trip_locations(desiredLocation, activities):
         {
             "role": "system",
             "content": "You are a travel-planning list-maker. "
-            + "Generate 10 travel destinations depending on user input. "
+            + "Generate 8 travel destinations depending on user input. "
             + "For example: if the user likes Hawaii and swimming, suggest places like Cancun, Caribbeans, etc. "
             + "Example 2: if the user likes hiking, suggest places like the Canadian Rockies, Lake Tahoe, or Half Dome. "
             + "Format each different place on a new line. "
@@ -138,10 +147,8 @@ def generate_trip_locations(desiredLocation, activities):
             + "FIVE: Galapagos Islands\n"
             + "SIX: Caribbeans\n"
             + "SEVEN: Fiji\n"
-            + "EIGHT: Samoa\n"
-            + "NINE: Dominican Republic\n"
-            + "TEN: Barbados'"
-            + "Notice how Hawaii and Cancun had discriptions, this is the ideal format. ",
+            + "EIGHT: Samoa"
+            + "Notice how Hawaii and Cancun had discriptions, this is the ideal format. Please do no generate any additional text other than what was asked for",
         },
         {
             "role": "user",
