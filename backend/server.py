@@ -1,17 +1,42 @@
 import os
-import openai
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, redirect, render_template, url_for
 from flask_cors import CORS
+
+# APIs
+import openai
 import googlemaps
 from geopy.geocoders import Nominatim
-from dotenv import load_dotenv
+from googleapiclient.discovery import build
+
 
 app = Flask(__name__)
 CORS(app)
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 gmaps_api_key = os.getenv("GMAPS_API_KEY")
+google_general_api_key = os.getenv("GOOGLE_API_KEY")
+google_search_engine_ID = os.getenv("GOOGLE_SEARCH_ID")
 gmaps = googlemaps.Client(gmaps_api_key)
+
+service = build("customsearch", "v1", developerKey=google_general_api_key)
+
+
+# GOOGLE CUSTOM SEARCH
+def search_location_images(query):
+    response = (
+        service.cse()
+        .list(
+            cx=google_search_engine_ID,
+            q=query,
+            searchType="image",
+            num=1,  # Number of images to retrieve
+        )
+        .execute()
+    )
+
+    images = response.get("items", [])
+    return images[0]
 
 
 # GMAPS
@@ -97,6 +122,11 @@ def getTripLocations():
         if location_data:
             locationDict[location]["latitude"] = location_data.latitude
             locationDict[location]["longitude"] = location_data.longitude
+
+    # Get the url of a picture of the location
+    for location in locationDict:
+        locationLink = search_location_images(location)["link"]
+        locationDict[location]["picture"] = locationLink
 
     print(len(locationDict))
     return locationDict

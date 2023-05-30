@@ -87,6 +87,8 @@ const DestinationPage = ({ setResponse, setTripInput, response, setTripData, han
     }
   };
   
+  // If the page is loading, only load a Loading message, 
+  // this prevents user from submitting too many requests in a row
   if (isLoading) {
     return <div className='container'>
       <h1>Loading...</h1>

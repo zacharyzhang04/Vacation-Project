@@ -25,7 +25,8 @@ const  MyMap = ({setTripInput, response}) => {
         placeName: placeName,
         latitude: response[placeName].latitude,
         longitude: response[placeName].longitude,
-        description: response[placeName].description
+        description: response[placeName].description,
+        pictureURL: response[placeName].picture
     }));
     console.log(placesList);
     
@@ -44,7 +45,7 @@ const  MyMap = ({setTripInput, response}) => {
                     key={place.placeName}
                     position={{ lat: place.latitude, lng: place.longitude }}
                     map={map}
-                    content={{name: place.placeName, description: place.description}}
+                    content={{name: place.placeName, description: place.description, pictureURL: place.pictureURL}}
                 />
             ))}
             <div style={overlayTextStyle}> CHOOSE YOUR DESTINATION </div>
@@ -63,6 +64,10 @@ const Marker = ({ position, map, content }) => {
             content: `<div>
                         <h1>${content.name}</h1>
                         ${content.description}
+                        <img src=${content.pictureURL} alt="Image" style="max-width: 400px;
+                        max-height: 400px;
+                        width: auto;
+                        height: auto;"/>
                         <button id="selectButton">Select</button>
                     </div>`
         });
