@@ -99,7 +99,8 @@ def getTripLocations():
             locationDict[location]["longitude"] = location_data.longitude
 
     print(locationDict)
-    return locations
+    return jsonify(locationDict)
+    # return locations
 
 
 @app.route("/tripAttractions", methods=["POST"])

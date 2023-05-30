@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 // We def got to rename variables when we done. 
-const DestinationPage = ({tripInput, response, setResponse, setTripInput, setTripData, handlePageChange}) => {
+const DestinationPage = ({ setResponse, setTripInput, setTripData, handlePageChange}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
@@ -35,42 +35,55 @@ const DestinationPage = ({tripInput, response, setResponse, setTripInput, setTri
     }
   };
 
-  const planTrip = () => {
-    // make request to backend to get openAI API data. then use that data to load next page. slay
-
-    const params = {
-      "desiredLocation" : desiredLocation,
-      "days": days,
-      "activities": activities,
-      "startDate": start
-    }
-    setTripInput(params);
-
-    let currentTripData = {};
-    currentTripData["desiredLocation"] = desiredLocation;
-    currentTripData["lengthOfTrip"] = Number(days);
-    currentTripData["startDate"] = start;
-    currentTripData["activities"] = activities;
-    currentTripData["itinerary"] = "";
-    currentTripData["packingList"] = "";
-    setTripData(currentTripData);
-
-    setIsLoading(true);
-    const getResponse = async () => {
-      await fetch('http://localhost:5002/tripLocations', {
-          method: 'POST',
-          headers: {"Content-Type": "application/json" },
-          body: JSON.stringify(tripInput)
-        })
-        .then( response => response.text())
-        .then(data => setResponse(data))
-        .catch(error => console.error(error));
+  const planTrip = async () => {
     
-        console.log(response);
-        setIsLoading(false);
-        handlePageChange('choose');
+    const params = {
+      desiredLocation: desiredLocation,
+      days: days,
+      activities: activities,
+      startDate: start
+    };
+  
+    setTripInput(params);
+    console.log(params);
+  
+    let currentTripData = {
+      desiredLocation: desiredLocation,
+      lengthOfTrip: Number(days),
+      startDate: start,
+      activities: activities,
+      itinerary: "",
+      packingList: ""
+    };
+    setTripData(currentTripData);
+    setIsLoading(true);
+  
+    try {
+      const response = await fetch('http://localhost:5002/tripLocations', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params)
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.text();
+  
+      if (Object.keys(data).length <= 3) {
+        console.log("ERROR: YOU DID NOT ENTER A LOCATION");
+        throw new Error('Invalid response data');
+      }
+  
+      setResponse(data);
+      console.log(data);
+      setIsLoading(false);
+      handlePageChange('choose');
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
     }
-    getResponse();
   };
   
   if (isLoading) {
@@ -81,9 +94,7 @@ const DestinationPage = ({tripInput, response, setResponse, setTripInput, setTri
   return (
     <div className='container'>
       <h1>Almost There...</h1>
-      
       <h3> We'll need to ask some questions to choose the perfect vacation destination!</h3>
-
       <p> Enter an example of your desired vacation location </p> 
       <input name="desired_location" 
       className="textbox" type="text" value={desiredLocation} onChange={handleLocationChange} />
@@ -101,8 +112,6 @@ const DestinationPage = ({tripInput, response, setResponse, setTripInput, setTri
       <br></br>
       <button className="submit-button" onClick={addActivity}>Add Activity</button>
 
-
-
       <div>
         <h2>List of Activities</h2>
         <ul>
@@ -111,8 +120,6 @@ const DestinationPage = ({tripInput, response, setResponse, setTripInput, setTri
           ))}
         </ul>
       </div>
-
-
       <button className="submit-button" onClick={planTrip}> PLAN MY TRIP</button>
     </div>
   );

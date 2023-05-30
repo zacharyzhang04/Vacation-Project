@@ -32,8 +32,7 @@ function App() {
         return <DestinationPage setTripInput={setTripInput} 
                                 setTripData={setTripData} 
                                 handlePageChange={handlePageChange}
-                                tripInput={tripInput}
-                            response={response} setResponse={setResponse} />;
+                                setResponse={setResponse} />;
       case 'loading':
         return <LoadingPage tripInput={tripInput}
                             response={response} setResponse={setResponse}
