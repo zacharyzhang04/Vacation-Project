@@ -1,7 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import { Wrapper } from "@googlemaps/react-wrapper";
 
-const  MyMap = () => {
+const  MyMap = ({setTripInput, response}) => {
     const [map, setMap] = useState();
     const ref = useRef();
     const style = { height: "100vh" }
@@ -19,19 +19,34 @@ const  MyMap = () => {
         borderRadius: '5px',
         border: '2px solid #ffffff'
     };
+
+    console.log(Object.keys(response).length);
+    const placesList = Object.keys(response).map((placeName) => ({
+        placeName: placeName,
+        latitude: response[placeName].latitude,
+        longitude: response[placeName].longitude,
+        description: response[placeName].description
+    }));
+    console.log(placesList);
+    
   
     useEffect(() => {
-      setMap(new window.google.maps.Map(ref.current, {
-        center: {lat: 0, lng: 0},
-        zoom: 3
-      }));
+        setMap(new window.google.maps.Map(ref.current, {
+            center: {lat: 0, lng: 0},
+            zoom: 3
+        }));
     }, []);
     return (
         <>
             <div ref={ref} style={style} id="map" />
-            <Marker position={{lat:0, lng:0}} map={map} 
-                content=
-                "<div>hello</div><button>click me</button>"/>
+            {placesList.map((place) => (
+                <Marker
+                    key={place.placeName}
+                    position={{ lat: place.latitude, lng: place.longitude }}
+                    map={map}
+                    content={{name: place.placeName, description: place.description}}
+                />
+            ))}
             <div style={overlayTextStyle}> CHOOSE YOUR DESTINATION </div>
         </>
     );
@@ -40,16 +55,32 @@ const  MyMap = () => {
 const Marker = ({ position, map, content }) => {
     const [marker, setMarker] = useState(null);
     const [infoWindow, setInfoWindow] = useState(null);
-  
+    
+
     useEffect(() => {
         const newMarker = new window.google.maps.Marker({});
         const newInfoWindow = new window.google.maps.InfoWindow({
-            content: content
+            content: `<div>
+                        <h1>${content.name}</h1>
+                        ${content.description}
+                        <button id="selectButton">Select</button>
+                    </div>`
         });
-  
+        
         setMarker(newMarker);
         setInfoWindow(newInfoWindow);
-    
+
+
+        const changeDestination = () => {
+            console.log('FUCK');
+        };
+
+
+        newInfoWindow.addListener('domready', () => {
+            const selectButton = document.getElementById('selectButton');
+            selectButton.addEventListener('click', changeDestination);
+        });
+
         return () => {
             newMarker.setMap(null);
             newInfoWindow.close();
@@ -57,23 +88,23 @@ const Marker = ({ position, map, content }) => {
     }, [content]);
   
     useEffect(() => {
-      if (marker && map) {
-        marker.setMap(map);
-        marker.setPosition(position);
-        const handleClick = () => {
-          infoWindow.open(map, marker);
-        };
-        marker.addListener('click', handleClick);
-      }
+        if (marker && map) {
+            marker.setMap(map);
+            marker.setPosition(position);
+            const handleClick = () => {
+                infoWindow.open(map, marker);
+            };
+            marker.addListener('click', handleClick);
+        }
     }, [marker, map, position, infoWindow]);
   
     return null;
 };
 
 
-const ChooseDestinationPage = () => {
+const ChooseDestinationPage = ({setTripInput, response}) => {
     return <Wrapper apiKey={process.env.REACT_APP_GMAPS_API_KEY}>
-        <MyMap />
+        <MyMap setTripInput={setTripInput} response={response}/>
     </Wrapper>
 };
 

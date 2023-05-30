@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 // We def got to rename variables when we done. 
-const DestinationPage = ({ setResponse, setTripInput, setTripData, handlePageChange}) => {
+const DestinationPage = ({ setResponse, setTripInput, response, setTripData, handlePageChange}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activities, setActivities] = useState([]);
   const [activity, setActivity] = useState("");
@@ -69,7 +69,7 @@ const DestinationPage = ({ setResponse, setTripInput, setTripData, handlePageCha
         throw new Error('Network response was not ok');
       }
 
-      const data = await response.text();
+      const data = await response.json();
   
       if (Object.keys(data).length <= 3) {
         console.log("ERROR: YOU DID NOT ENTER A LOCATION");
@@ -78,8 +78,9 @@ const DestinationPage = ({ setResponse, setTripInput, setTripData, handlePageCha
   
       setResponse(data);
       console.log(data);
-      setIsLoading(false);
+
       handlePageChange('choose');
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
       setIsLoading(false);

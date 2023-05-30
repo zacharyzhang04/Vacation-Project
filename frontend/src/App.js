@@ -1,4 +1,4 @@
-import React,  { useState } from 'react';
+import React,  { useState, useEffect } from 'react';
 import HomePage from './pages/Home';
 import DestinationPage from './pages/DestinationPage';
 import ResultPage from './pages/ResultPage';
@@ -21,16 +21,16 @@ function App() {
     setCurrentPage(page);
   };
 
-  
-
 
   const renderPage = () => {
     switch (currentPage) {
       case 'choose':
-        return <ChooseDestination />
+        return <ChooseDestination setTripInput={setTripInput}
+                                  response={response}/>
       case 'destinations':
         return <DestinationPage setTripInput={setTripInput} 
                                 setTripData={setTripData} 
+                                response={response}
                                 handlePageChange={handlePageChange}
                                 setResponse={setResponse} />;
       case 'loading':
