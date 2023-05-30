@@ -6,6 +6,7 @@ from flask_cors import CORS
 # APIs
 import openai
 import googlemaps
+import requests
 from geopy.geocoders import Nominatim
 from googleapiclient.discovery import build
 
@@ -17,6 +18,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 gmaps_api_key = os.getenv("GMAPS_API_KEY")
 google_general_api_key = os.getenv("GOOGLE_API_KEY")
 google_search_engine_ID = os.getenv("GOOGLE_SEARCH_ID")
+unsplash_access_key = os.getenv("UNSPLASH_API_KEY")
 gmaps = googlemaps.Client(gmaps_api_key)
 
 service = build("customsearch", "v1", developerKey=google_general_api_key)
@@ -34,9 +36,31 @@ def search_location_images(query):
         )
         .execute()
     )
-
     images = response.get("items", [])
-    return images[0]
+    if images:
+        image_data = images[0]["image"]
+        attribution = image_data.get("contextLink", "")
+        image_url = images[0]["link"]
+        return image_url, attribution
+    else:
+        return None, None
+
+
+# UNSPLASH
+@app.route("/generate_image")
+def generate_image():
+    location_name = request.args.get("location")
+
+    url = f"https://api.unsplash.com/photos/random?query={location_name}&client_id={unsplash_access_key}"
+    response = requests.get(url)
+    data = response.json()
+
+    if "urls" in data and "user" in data:
+        image_url = data["urls"]["regular"]
+        image_author = data["user"]["name"]
+        return jsonify(image_url, image_author)
+    else:
+        return "Image not found"
 
 
 # GMAPS
@@ -125,8 +149,9 @@ def getTripLocations():
 
     # Get the url of a picture of the location
     for location in locationDict:
-        locationLink = search_location_images(location)["link"]
+        locationLink, locationSource = search_location_images(location)
         locationDict[location]["picture"] = locationLink
+        locationDict[location]["pictureSource"] = locationSource
 
     print(len(locationDict))
     return locationDict

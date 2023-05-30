@@ -20,15 +20,46 @@ const  MyMap = ({setTripInput, response}) => {
         border: '2px solid #ffffff'
     };
 
+    // Unsplash
+    // let imageUrl, imageAuthor;
+    // const generateImage = async (locationName) => {
+    //     const url = `http://localhost:5002/generate_image?location=${encodeURIComponent(locationName)}`;
+
+    //     await fetch(url)
+    //     .then(response => response.json())
+    //     .then(data => {
+    //     if (data.image_url) {
+    //     // Use the generated image URL
+    //         console.log(data.image_url);
+    //         imageUrl = data.image_url;
+    //         imageAuthor = data.image_author;
+    //         return 
+    //     } else {
+    //     // Handle error case
+    //         console.log('Image not found');
+    //     }
+    //     })
+    //     .catch(error => {
+    //         console.error('Error:', error);
+    //     });
+    // };
+
     console.log(Object.keys(response).length);
-    const placesList = Object.keys(response).map((placeName) => ({
+    let placesList = Object.keys(response).map((placeName) => ({
         placeName: placeName,
         latitude: response[placeName].latitude,
         longitude: response[placeName].longitude,
         description: response[placeName].description,
-        pictureURL: response[placeName].picture
+        //for CustomSearchAPI
+        pictureURL: response[placeName].picture,
+        pictureSource: response[placeName].pictureSource
     }));
-    console.log(placesList);
+    
+    // Unsplash API
+    // generateImage(placesList.placeName);
+    // placesList["pictureURL"] = imageUrl;
+    // placesList["pictureAuthor"] = imageAuthor;
+    // console.log(placesList);
     
   
     useEffect(() => {
@@ -45,7 +76,8 @@ const  MyMap = ({setTripInput, response}) => {
                     key={place.placeName}
                     position={{ lat: place.latitude, lng: place.longitude }}
                     map={map}
-                    content={{name: place.placeName, description: place.description, pictureURL: place.pictureURL}}
+                    content={{name: place.placeName, description: place.description,
+                         pictureURL: place.pictureURL, pictureSource: place.pictureSource}} 
                 />
             ))}
             <div style={overlayTextStyle}> CHOOSE YOUR DESTINATION </div>
@@ -63,11 +95,14 @@ const Marker = ({ position, map, content }) => {
         const newInfoWindow = new window.google.maps.InfoWindow({
             content: `<div>
                         <h1>${content.name}</h1>
-                        ${content.description}
-                        <img src=${content.pictureURL} alt="Image" style="max-width: 400px;
-                        max-height: 400px;
-                        width: auto;
-                        height: auto;"/>
+                        ${content.description} <br>
+                        <figure>
+                            <img src=${content.pictureURL} alt="Image" style="max-width: 400px;
+                            max-height: 400px;
+                            width: auto;
+                            height: auto;"/> 
+                            <figcaption> Courtesy of ${content.pictureSource}. </figcaption>
+                        </figure>
                         <button id="selectButton">Select</button>
                     </div>`
         });
