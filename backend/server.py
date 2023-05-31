@@ -8,7 +8,7 @@ import openai
 import googlemaps
 import requests
 from geopy.geocoders import Nominatim
-from googleapiclient.discovery import build
+# from googleapiclient.discovery import build
 
 
 app = Flask(__name__)
@@ -16,51 +16,59 @@ CORS(app)
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 gmaps_api_key = os.getenv("GMAPS_API_KEY")
-google_general_api_key = os.getenv("GOOGLE_API_KEY")
-google_search_engine_ID = os.getenv("GOOGLE_SEARCH_ID")
+# google_general_api_key = os.getenv("GOOGLE_API_KEY")
+# google_search_engine_ID = os.getenv("GOOGLE_SEARCH_ID")
 unsplash_access_key = os.getenv("UNSPLASH_API_KEY")
 gmaps = googlemaps.Client(gmaps_api_key)
 
-service = build("customsearch", "v1", developerKey=google_general_api_key)
+# service = build("customsearch", "v1", developerKey=google_general_api_key)
 
 
-# GOOGLE CUSTOM SEARCH
-def search_location_images(query):
-    response = (
-        service.cse()
-        .list(
-            cx=google_search_engine_ID,
-            q=query,
-            searchType="image",
-            num=1,  # Number of images to retrieve
-        )
-        .execute()
-    )
-    images = response.get("items", [])
-    if images:
-        image_data = images[0]["image"]
-        attribution = image_data.get("contextLink", "")
-        image_url = images[0]["link"]
-        return image_url, attribution
-    else:
-        return None, None
+# # GOOGLE CUSTOM SEARCH
+# def search_location_images(query):
+#     response = (
+#         service.cse()
+#         .list(
+#             cx=google_search_engine_ID,
+#             q=query,
+#             searchType="image",
+#             num=1,  # Number of images to retrieve
+#         )
+#         .execute()
+#     )
+#     images = response.get("items", [])
+#     if images:
+#         image_data = images[0]["image"]
+#         attribution = image_data.get("contextLink", "")
+#         image_url = images[0]["link"]
+#         return image_url, attribution
+#     else:
+#         return None, None
 
 
 # UNSPLASH
-@app.route("/generate_image")
+@app.route("/generate_image", methods=["POST"])
 def generate_image():
     location_name = request.args.get("location")
+    count = int(request.args.get("count", 5))
 
-    url = f"https://api.unsplash.com/photos/random?query={location_name}&client_id={unsplash_access_key}"
+    url = f"https://api.unsplash.com/photos/random?query={location_name}&count={count}&client_id={unsplash_access_key}"
     response = requests.get(url)
     data = response.json()
 
-    if "urls" in data and "user" in data:
-        image_url = data["urls"]["regular"]
-        image_author = data["user"]["name"]
-        return jsonify(image_url, image_author)
+    if isinstance(data, list) and len(data) > 0:
+        images = [(image["urls"]["regular"], image["user"]["name"]) for image in data]
+        return jsonify(images)
     else:
-        return "Image not found"
+        return "Images not found"
+    # if "urls" in data and "user" in data:
+    #     image_url = data["urls"]["regular"]
+    #     image_author = data["user"]["name"]
+    #     print("HELLO")
+    #     print(image_url)
+    #     return jsonify(image_url, image_author)
+    # else:
+    #     return "Image not found"
 
 
 # GMAPS
@@ -147,11 +155,11 @@ def getTripLocations():
             locationDict[location]["latitude"] = location_data.latitude
             locationDict[location]["longitude"] = location_data.longitude
 
-    # Get the url of a picture of the location
-    for location in locationDict:
-        locationLink, locationSource = search_location_images(location)
-        locationDict[location]["picture"] = locationLink
-        locationDict[location]["pictureSource"] = locationSource
+    # # Get the url of a picture of the location
+    # for location in locationDict:
+    #     locationLink, locationSource = search_location_images(location)
+    #     locationDict[location]["picture"] = locationLink
+    #     locationDict[location]["pictureSource"] = locationSource
 
     print(len(locationDict))
     return locationDict
