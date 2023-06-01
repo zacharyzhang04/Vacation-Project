@@ -3,7 +3,7 @@ import { db} from "../config/firebase.js"
 import { collection, addDoc } from "firebase/firestore";
 
 const ResultPage = ({response, userData, tripData, setTripData}) => {
-  const processResponse = () => {
+  /*const processResponse = () => {
     let currentTripData = tripData;
     currentTripData["UserId"] = userData.UserId;
     setTripData(currentTripData);
@@ -27,7 +27,12 @@ const ResultPage = ({response, userData, tripData, setTripData}) => {
         <button className="submit-button" onClick={createTrip}> Save Trip</button>
       </div>
     </div>
-  );
+  );*/
+  return (
+    <div>
+      HELLO BITCHASS HOE
+    </div>
+  )
 };
 
 export default ResultPage;

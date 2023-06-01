@@ -1,53 +1,20 @@
 import React, {useState, useRef, useEffect} from 'react';
 import { Wrapper } from "@googlemaps/react-wrapper";
 
-const  MyMap = ({setTripInput, response}) => {
+const  MyMap = ({tripInput, setTripInput, response, handlePageChange}) => {
     const [map, setMap] = useState();
+    const [placesList, setPlacesList] = useState([]);
     const ref = useRef();
-    const style = { height: "100vh" }
-    
-    // add to CSS file later
-    const overlayTextStyle = {
-        font: "Times New Roman",
-        position: 'absolute',
-        top: '5px',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        fontSize: '36px',
-        fontWeight: 'bold',
-        color: '#ffffff',
-        margin: '20px',
-        fontStyle: 'italic'
-    };
 
-    
+
     useEffect(() => {
         console.log(Object.keys(response).length);
-    }, [])
-
-    
-    const [placesList, setPlacesList] = useState([]);
-    // let placesList = Object.keys(response).map((placeName) => ({
-    //     placeName: placeName,
-    //     latitude: response[placeName].latitude,
-    //     longitude: response[placeName].longitude,
-    //     description: response[placeName].description,
-    //     // for Unsplash
-    //     // pictureURL: generateImage(response[placeName]).imageUrl,
-    //     // pictureSource: generateImage(response[placeName]).imageAuthor
-    //     // // for CustomSearchAPI
-    //     // pictureURL: response[placeName].picture,
-    //     // pictureSource: response[placeName].pictureSource
-    // }));
-    
-  
-    useEffect(() => {
         setMap(new window.google.maps.Map(ref.current, {
             center: {lat: 0, lng: 0},
             zoom: 3
         }));
 
-        const generateImage = async (locationName, count = 5) => {
+        const generateImage = async (locationName, count) => {
             const url = `http://localhost:5002/generate_image?location=${encodeURIComponent(locationName)}&count=${count}`;
           
             return fetch(url, {
@@ -77,7 +44,7 @@ const  MyMap = ({setTripInput, response}) => {
           const generatePlacesList = async () => {
             const generatedPlacesList = await Promise.all(
               Object.keys(response).map(async (placeName) => {
-                const imagesData = await generateImage(placeName, 5);
+                const imagesData = await generateImage(placeName, 6);
                 const images = imagesData.map((imageData) => imageData.imageUrl);
                 const pictureURLsHTML = images.map((pictureURL) => `
                     <div style="width: 200px; height: 200px; overflow: hidden; border: 2px solid black; border-radius: 10px;">
@@ -96,7 +63,6 @@ const  MyMap = ({setTripInput, response}) => {
                 };
               })
             );
-          
             console.log(generatedPlacesList);
             setPlacesList(generatedPlacesList);
           };
@@ -107,7 +73,7 @@ const  MyMap = ({setTripInput, response}) => {
 
     return (
         <>
-            <div ref={ref} style={style} id="map" />
+            <div ref={ref} style={{ height: "100vh" }} id="map" />
             {placesList.map((place) => (
                 <Marker
                     key={place.placeName}
@@ -115,14 +81,17 @@ const  MyMap = ({setTripInput, response}) => {
                     map={map}
                     content={{name: place.placeName, description: place.description,
                          pictureURLs: place.imageURLs}} 
+                    tripInput={tripInput} 
+                    setTripInput={setTripInput}
+                    handlePageChange={handlePageChange}
                 />
             ))}
-            <div style={overlayTextStyle}> CHOOSE YOUR DESTINATION </div>
+            <div className="overlay"> CHOOSE YOUR DESTINATION </div>
         </>
     );
 };
 
-const Marker = React.memo( ({ position, map, content }) => {
+const Marker = ({ position, map, content, tripInput, setTripInput, handlePageChange}) => {
     const [marker, setMarker] = useState(null);
     const [infoWindow, setInfoWindow] = useState(null);
     
@@ -130,7 +99,7 @@ const Marker = React.memo( ({ position, map, content }) => {
         const newMarker = new window.google.maps.Marker({});
         const newInfoWindow = new window.google.maps.InfoWindow({
             content: `<div style="margin-bottom: 20px;">
-                        <h1>${content.name}</h1>
+                        <h1 id="placeName">${content.name}</h1>
                         <p style="margin-bottom: 10px;">${content.description}</p>
                         <br>
                         <button id="selectButton" style="margin-bottom: 10px; border-radius: 20px; padding: 10px 20px; color: #000; font-size: 16px; cursor: pointer;">Select</button>
@@ -151,9 +120,16 @@ const Marker = React.memo( ({ position, map, content }) => {
     }, [content]);
   
     useEffect(() => {
-        const changeDestination = () => {
-            console.log('FUCK');
-        };
+        const changeDestination = (destination) => {
+            console.log("LOCATION SELECTED");
+            const newTripInput = {
+                ...tripInput,
+                destination: destination
+              }
+            setTripInput(newTripInput);
+            handlePageChange("result");
+            console.log(newTripInput);
+          };
 
         if (marker && map) {
             marker.setMap(map);
@@ -162,29 +138,34 @@ const Marker = React.memo( ({ position, map, content }) => {
                 infoWindow.open(map, marker);
                 infoWindow.addListener('domready', () => {
                     const selectButton = document.getElementById('selectButton');
-                    if (selectButton) {
-                        selectButton.addEventListener('click', changeDestination);
+                    const placeElement = document.getElementById('placeName');
+                    if (selectButton && placeElement) {
+                        const placeName = placeElement.textContent;
+                        selectButton.addEventListener('click', () => changeDestination(placeName));
                     }
                 });
-            };
-            marker.addListener('click', handleClick);
-        }
-        window.google.maps.event.addListener(map, 'click', function() {
-            if (infoWindow.getMap()) {
-              infoWindow.close();
             }
-          });
+            marker.addListener('click', handleClick);
+            window.google.maps.event.addListener(map, 'click', function() {
+                if (infoWindow && infoWindow.getMap()) {
+                infoWindow.close();
+                }
+            });
+        }
     }, [marker, map, position, infoWindow]);
 
   
     return null;
-});
+};
 
 
 
-const ChooseDestinationPage = ({setTripInput, response}) => {
+const ChooseDestinationPage = ({tripInput, setTripInput, response, handlePageChange}) => {
     return <Wrapper apiKey={process.env.REACT_APP_GMAPS_API_KEY}>
-        <MyMap setTripInput={setTripInput} response={response}/>
+        <MyMap tripInput={tripInput}
+                setTripInput={setTripInput}
+                response={response}
+                handlePageChange={handlePageChange}/>
     </Wrapper>
 };
 
