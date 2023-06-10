@@ -21,6 +21,7 @@ function App() {
   };
 
 
+
   const renderPage = () => {
     switch (currentPage) {
       case 'choose':
@@ -37,7 +38,9 @@ function App() {
       case 'result':
         return <ResultPage response={response}
                             userData={userData}
-                            tripData={tripData} setTripData={setTripData} />;
+                            tripData={tripData} setTripData={setTripData}
+                            tripInput={tripInput} 
+                            handlePageChange={handlePageChange}/>;
       case 'login':
         return <LoginPage userData={userData} setUserData={setUserData} 
                           handlePageChange={handlePageChange}/>

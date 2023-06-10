@@ -124,7 +124,7 @@ const Marker = ({ position, map, content, tripInput, setTripInput, handlePageCha
             console.log("LOCATION SELECTED");
             const newTripInput = {
                 ...tripInput,
-                destination: destination
+                desiredLocation: destination
               }
             setTripInput(newTripInput);
             handlePageChange("result");

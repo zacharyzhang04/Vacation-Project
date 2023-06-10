@@ -13,7 +13,7 @@ CORS(app)
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 gmaps_api_key = os.getenv("GMAPS_API_KEY")
-unsplash_access_key = os.getenv("UNSPLASH_API_KEY4")
+unsplash_access_key = os.getenv("UNSPLASH_API_KEY")
 gmaps = googlemaps.Client(gmaps_api_key)
 
                     #############################################################################
@@ -59,10 +59,12 @@ def get_top_restaurants():
         latitude, longitude = location_data.latitude, location_data.longitude
         search_radius = 5000
         top_restaurants = search_restaurants((latitude, longitude), search_radius)
-
+        names = [place["name"] for place in top_restaurants]
         # Return the top restaurants as JSON response
-        return jsonify({"restaurants": top_restaurants})
-    return jsonify({"error": "Invalid location"})
+        return jsonify({"restaurants": names})
+    else:
+        print("NO LOCATION FOUND")
+        return jsonify({"restaurants": []})
 
 
 def search_restaurants(location, radius):
@@ -117,7 +119,6 @@ def getTripLocations():
 
     return locationDict
 
-
 @app.route("/tripAttractions", methods=["POST"])
 def getTripAttractions():
     data = request.get_json()
@@ -129,21 +130,80 @@ def getTripAttractions():
 
     attractionsResponse = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=generate_trip_attractions(desiredLocation, days, activities, date),
+        messages=generate_trip_attractions(desiredLocation, days, activities),
     )
     attractions = attractionsResponse["choices"][0]["message"]["content"]
-    print(attractions)
-    return attractions
+    
+    attractions_list = getList(attractions)
+    string = ""
+    url = "http://localhost:5002/api/restaurants"
+    for x in range(int(days)):
+        if x >= len(attractions_list):
+            break
+        
+        i = attractions_list[x]
+        params = {"location": i}
+        response = requests.post(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            restaurants = data["restaurants"]
+            string += "DAY " + "x" + ". Attraction: " + i + "RESTAURANTS: " + ",".join(restaurants) + "\n"
+        else:
+            print("Request failed with status code:", response.status_code)
+    
+    itineraryResponse = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=generate_itinerary(string, days, date),
+    )
+    itinerary = itineraryResponse["choices"][0]["message"]["content"]
+    
+    return jsonify({"itinerary": itinerary})
 
+def getList(attractions):
+    res = []
+    n = 1
+    while True:
+        if ("ATTRACTION " + str(n)) in attractions:
+            cur = ""
+            if ("ATTRACTION " + str(n+1)) in attractions:
+                s, e = attractions.index("ATTRACTION " + str(n)) + 13, attractions.index("ATTRACTION " + str(n+1))
+                cur = attractions[s:e]
+            else:
+                s = attractions.index("ATTRACTION " + str(n)) + 13
+                cur = attractions[s:]
+            res.append(cur)
+        else:
+            break
+        n += 1
+    return res
 
-# HOW TO CALL THE PACKING LIST SHIT
-# packingListResponse = openai.ChatCompletion.create(
-#     model="gpt-3.5-turbo",
-#     messages=generate_packingList_prompt(trip),
-# )
-# packingList = packingListResponse["choices"][0]["message"]["content"]
-
-
+def generate_itinerary(locations, days, start_date):
+    return [
+        {
+            "role": "system",
+            "content": "You are a vacation itinerary planning assistant. "
+            + "Generate an hours travel itinerary based on the data. "
+            + "Format it like this (first put the date, and then hourly activities on each subsequent line) "
+            + "9/01/23: "
+            + "9:00 AM: Breakfast at [restaurant 1]\n"
+            + "10:00 AM: [Insert activity at attraction]\n"
+            + "1:00 PM: Lunch at [restaurant 2]\n..."
+            + "and so on..."
+            + "Make sure you use ALL the provided restaurants. "
+            + "Do not generate ANY other text other than the itinerary itself. PLEASE. Thanks."
+        },
+        {
+            "role": "user",
+            "content": "Here are the attractions and restaurants I am going to:"
+            + locations,
+        },
+        {
+            "role": "user",
+            "content": "The start date is " + start_date + " and I am going for " + days + " days"
+        },
+    ]
+    
+    
 def generate_trip_locations(desiredLocation, activities):
     return [
         {
@@ -176,41 +236,42 @@ def generate_trip_locations(desiredLocation, activities):
         },
     ]
 
-
-def generate_trip_attractions(desiredLocation, days, activities, date):
+def generate_trip_attractions(desiredLocation, days, activities):
     return [
         {
             "role": "system",
             "content": "You are a travel planning assistant. "
-            + "Generate a list of popular attractions I can go to in "
-            + desiredLocation
-            + "."
+            + "Generate a list of popular attractions I can go to in " + desiredLocation + "."
             + "Format it with a header displaying the location. "
-            + "For example, if the user is visiting Hawaii, the first line should be 'LOCATION: Hawaii' "
-            + "Then, generate a list of popular attractions to visit each day, with 4 places for each day. "
-            + "(for example, for a 3 day trip, generate 12 attractions and for a 10 day trip, generate 40 attractions.) "
-            + "Format each list item on a new line, starting with 'ATTRACTION 1: ', 'ATTRACTION 2: ', etc. "
-            + "Here is an example for days == 1 and a user inputted location of 'Hawaii': "
-            + "LOCATION: Hawaii: \n"
-            + "ATTRACTION 1: Hawaii Volcanoes National Park \n"
+            + "For example, if the user is visiting Hawaii for n days, "
+            + "generate exactly n attractions. "
+            + "Format your response exactly as the example below. "
+            + "Here is an example for days=4, location=Hawaii and activities includes sightseeing: "
+            + "'ATTRACTION 1: Hawaii Volcanoes National Park \n"
             + "ATTRACTION 2: Polynesian Cultural Center \n"
             + "ATTRACTION 3: Pearl Harbor \n"
-            + "ATTRACTION 4: Waimea Canyon State Park \n",
+            + "ATTRACTION 4: Waimea Canyon State Park \n.'"
+            + "ONLY generate n lines, where n = days. Do NOT ask questions or apologize or make any other remarks."
+            + "ONLY generate PLACES; do NOT generate ANY verbs. Thank you."
         },
         {
             "role": "user",
-            "content": "I am currently planning a vacation trip that will span "
-            + days
-            + " days and begins on "
-            + date,
-        },
-        {
-            "role": "user",
-            "content": "I would like to do these activities: " + ",".join(activities),
+            "content": "I am currently planning a vacation trip that will span " + days + "."
+            + "I would like to do these activities: " + ",".join(activities),
         },
     ]
 
+                                    ##############################################################
+                                    ### IGNORE THE REST FOR NOW ###########
 
+
+
+# HOW TO CALL THE PACKING LIST SHIT
+# packingListResponse = openai.ChatCompletion.create(
+#     model="gpt-3.5-turbo",
+#     messages=generate_packingList_prompt(trip),
+# )
+# packingList = packingListResponse["choices"][0]["message"]["content"]
 def generate_packingList_prompt(trip):
     return [
         {
