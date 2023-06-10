@@ -109,3 +109,17 @@
 .login-button:hover {
   background-color: #485a4d;
 }
+
+.overlay {
+  font-family: 'Times New Roman';
+  position: fixed;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 38px;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 20px;
+  font-style: italic;
+  z-index: 999;
+}

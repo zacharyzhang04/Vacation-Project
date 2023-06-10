@@ -6,7 +6,6 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import NavBar from './components/navbar';
 import SignUpPage from './pages/SignUpPage';
-import LoadingPage from './pages/LoadingPage'
 import "./App.css";
 import ChooseDestination from './pages/ChooseDestination';
 
@@ -22,25 +21,26 @@ function App() {
   };
 
 
+
   const renderPage = () => {
     switch (currentPage) {
       case 'choose':
-        return <ChooseDestination setTripInput={setTripInput}
-                                  response={response}/>
+        return <ChooseDestination tripInput={tripInput}
+                                  setTripInput={setTripInput}
+                                  response={response}
+                                  handlePageChange={handlePageChange}/>
       case 'destinations':
         return <DestinationPage setTripInput={setTripInput} 
                                 setTripData={setTripData} 
                                 response={response}
                                 handlePageChange={handlePageChange}
                                 setResponse={setResponse} />;
-      case 'loading':
-        return <LoadingPage tripInput={tripInput}
-                            response={response} setResponse={setResponse}
-                            handlePageChange={handlePageChange}/>;
       case 'result':
         return <ResultPage response={response}
                             userData={userData}
-                            tripData={tripData} setTripData={setTripData} />;
+                            tripData={tripData} setTripData={setTripData}
+                            tripInput={tripInput} 
+                            handlePageChange={handlePageChange}/>;
       case 'login':
         return <LoginPage userData={userData} setUserData={setUserData} 
                           handlePageChange={handlePageChange}/>

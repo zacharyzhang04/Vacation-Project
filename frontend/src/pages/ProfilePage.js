@@ -56,7 +56,7 @@ const ProfilePage = ({userData}) => {
       {tripList.map((trip) => (
         <div key={trip}>
           <h1> {trip && trip.desiredLocation} Trip </h1>
-          <h3>START AND END DATES</h3> <p>{trip && trip.startDate}</p>
+          <h3>START DATE</h3> <p>{trip && trip.startDate}</p>
           {/* <p> {trip && trip.End.toDate().toString()}</p> */}
           <h3> ITINERARY</h3>
           <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>

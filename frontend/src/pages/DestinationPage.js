@@ -53,7 +53,7 @@ const DestinationPage = ({ setResponse, setTripInput, response, setTripData, han
       startDate: start,
       activities: activities,
       itinerary: "",
-      packingList: ""
+      packingList: "Make shore to bring yo clothes bro."
     };
     setTripData(currentTripData);
     setIsLoading(true);
